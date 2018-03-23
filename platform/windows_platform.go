@@ -112,7 +112,10 @@ func (p WindowsPlatform) GetAuditLogger() AuditLogger {
 }
 
 func (p WindowsPlatform) SetupRuntimeConfiguration() error {
-	return setupRuntimeConfiguration()
+	// Skip for now - so we don't randomize the Admin password!
+	//
+	// return setupRuntimeConfiguration()
+	return nil
 }
 
 func (p WindowsPlatform) CreateUser(username, _ string) error {

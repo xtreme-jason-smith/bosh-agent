@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 
+	lgpo "github.com/cloudfoundry/bosh-agent/lgpo"
 	applyspec "github.com/cloudfoundry/bosh-agent/agent/applier/applyspec"
 	boshplatform "github.com/cloudfoundry/bosh-agent/platform"
 	boshsettings "github.com/cloudfoundry/bosh-agent/settings"
@@ -137,6 +138,18 @@ func (boot bootstrap) Run() (err error) {
 
 	if err = boot.platform.SetupBlobsDir(); err != nil {
 		return bosherr.WrapError(err, "Setting up blobs dir")
+	}
+
+
+	// Apply policies AFTER setting up BOSH's dirs
+
+	boot.logger.Debug("BOOTSTRAP-POLICY", "STARTING")
+	if err = lgpo.ApplyPolicy(boot.logger); err != nil {
+		boot.logger.Debug("BOOTSTRAP-POLICY", "ERROR: %s", err)
+		// DO NOT RETURN ERROR - MARCH ON SO WE CAN ACCESS VM
+	} else {
+		// You should only see this if the policy were previously applied!
+		boot.logger.Debug("BOOTSTRAP-POLICY", "DONE")
 	}
 
 	if err = boot.comparePersistentDisk(); err != nil {
